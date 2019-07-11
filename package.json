@@ -1,0 +1,24 @@
+{
+  "name": "bsplit2",
+  "version": "1.0.0",
+  "description": "A binary transform stream splitting chunks by newline characters",
+  "main": "bsplit2.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Rod <rod@vagg.org> (http://r.va.gg/)",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rvagg/bsplit2"
+  },
+  "keywords": [
+    "streams",
+    "stream",
+    "split",
+    "newline"
+  ],
+  "devDependencies": {
+    "bl": "~3.0.0"
+  }
+}
