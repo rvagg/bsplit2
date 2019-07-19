@@ -1,6 +1,6 @@
 {
   "name": "bsplit2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A binary transform stream splitting chunks by newline characters",
   "main": "bsplit2.js",
   "scripts": {
