@@ -34,14 +34,57 @@ When run, will output:
 
 ```
 1: const fs = require('fs')
-2: const bsplit = require('bsplit')
-3: let i = 1
-4: fs.createReadStream(__filename)
-5:   .pipe(bsplit())
-6:   .on('data', (line) => console.log(`${i++}: ${line.toString()}`))
+2: const bsplit = require('bsplit2')
+3: 
+4: let i = 1
+5: fs.createReadStream(__filename)
+6:   .pipe(bsplit())
+7:   .on('data', (line) => console.log(`${i++}: ${line.toString()}`))
 ```
 
-Note the missing blank line. Empty chunks are not passed on with Node streams so you will not get an additional chunk in between consecutive `\n` characters.
+Or if you want to use a stream as an async iterator:
+
+```js
+const fs = require('fs')
+const bsplit = require('bsplit2')
+
+async function run () {
+  let i = 1
+  const stream = fs.createReadStream(__filename).pipe(bsplit())
+
+  for await (const line of stream) {
+    console.log(`${i++}: ${line.toString()}`)
+  }
+}
+
+run().catch((err) => {
+  console.error(err.stack)
+  process.exit(1)
+})
+```
+
+When run, will output:
+
+```
+1: const fs = require('fs')
+2: const bsplit = require('bsplit2')
+3: 
+4: async function run () {
+5:   let i = 1
+6:   const stream = fs.createReadStream(__filename).pipe(bsplit())
+7: 
+8:   for await (const line of stream) {
+9: 	  console.log(`${i++}: ${line.toString()}`)
+10:   }
+11: }
+12: 
+13: run().catch((err) => {
+14:   console.error(err.stack)
+15:   process.exit(1)
+16: })
+```
+
+bsplit2's readable streams are "[object mode](https://nodejs.org/api/stream.html#stream_object_mode)" meaning that they apply different backpressure rules even though they are still dealing with binary data. This may be an important consideration depending on your use-case. This can be turned off by messing with `stream._readableState.objectMode` (not recommended) but the internal stream `read()` function will revert back to providing non-newline-delimited chunks because it pulls from a buffer of chunks. This impacts async iterators and some other stream modes but the `'data'` event won't be impacted although it will drop blank lines.
 
 ## Licence & Copyright
 

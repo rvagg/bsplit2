@@ -10,7 +10,7 @@ function split () {
       let start = 0
       for (let i = 0; i < chunk.byteLength; i++) {
         if (chunk[i] === 10) { // '\n'
-          const next = chunk.slice(start, i)
+          let next = chunk.slice(start, i)
           if (overflow.length) {
             overflow.push(next)
             next = Buffer.concat(overflow)
