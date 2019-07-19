@@ -5,12 +5,12 @@ const { Transform } = require('stream')
 function split () {
   let overflow = []
 
-  return new Transform({
+  const stream = Transform({
     transform (chunk, enc, callback) {
       let start = 0
       for (let i = 0; i < chunk.byteLength; i++) {
         if (chunk[i] === 10) { // '\n'
-          let next = chunk.slice(start, i)
+          const next = chunk.slice(start, i)
           if (overflow.length) {
             overflow.push(next)
             next = Buffer.concat(overflow)
@@ -35,6 +35,13 @@ function split () {
       callback()
     }
   })
+
+  stream._readableState.objectMode = true
+  if (stream._readableState.highWaterMark) {
+    stream._readableState.highWaterMark = 16
+  }
+
+  return stream
 }
 
 module.exports = split

@@ -1,5 +1,7 @@
 # bsplit2
 
+[![NPM](https://nodei.co/npm/bsplit2.svg)](https://nodei.co/npm/bsplit2/)
+
 A transform stream that splits incoming data into newline separated chunks.
 
 Similar to [split2](https://github.com/mcollina/split2) but only operates on the binary data, doesn't do a string conversion, and _only_ looks for `\n` in the incoming stream. Use split2 if you want to break on `/\r?\n/` or if you're concerned that `\n` may not properly indicate newlines (e.g. unicode codepoints that include `\n` bytes).
