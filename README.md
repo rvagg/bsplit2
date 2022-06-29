@@ -22,7 +22,7 @@ example.js:
 
 ```js
 const fs = require('fs')
-const bsplit = require('bsplit')
+const bsplit = require('bsplit2')
 
 let i = 1
 fs.createReadStream(__filename)
