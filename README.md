@@ -10,15 +10,9 @@ Not similar and no relation to the "bsplit" package.
 
 ## API
 
-```js
-const bsplit = require('bsplit2')
-const splittingStream = bsplit()
-// ... pipe something through splittingStream ...
-```
+### `Transform` stream
 
-## Example
-
-example.js:
+`bsplit2` is a [transform stream](https://nodejs.org/docs/latest-v16.x/api/stream.html#class-streamtransform), so you can use e.g. `.pipe()` to connect it to other streams:
 
 ```js
 const fs = require('fs')
@@ -28,6 +22,7 @@ let i = 1
 fs.createReadStream(__filename)
   .pipe(bsplit())
   .on('data', (line) => console.log(`${i++}: ${line.toString()}`))
+  .once('end', () => console.log('end of file.'))
 ```
 
 When run, will output:
@@ -40,19 +35,22 @@ When run, will output:
 5: fs.createReadStream(__filename)
 6:   .pipe(bsplit())
 7:   .on('data', (line) => console.log(`${i++}: ${line.toString()}`))
+8:   .once('end', () => console.log('end of file.'))
+end of file.
 ```
 
-Or if you want to use a stream as an async iterator:
+Because any readable stream is an [async iterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_async_iterator_and_async_iterable_protocols), you can read from a `bsplit2` stream using `for await`:
 
 ```js
 const fs = require('fs')
 const bsplit = require('bsplit2')
 
 async function run () {
-  let i = 1
-  const stream = fs.createReadStream(__filename).pipe(bsplit())
+  const file = fs.createReadStream(__filename)
+  const lines = file.pipe(bsplit())
 
-  for await (const line of stream) {
+  let i = 1
+  for await (const line of lines) {
     console.log(`${i++}: ${line.toString()}`)
   }
 }
@@ -70,11 +68,11 @@ When run, will output:
 2: const bsplit = require('bsplit2')
 3: 
 4: async function run () {
-5:   let i = 1
-6:   const stream = fs.createReadStream(__filename).pipe(bsplit())
-7: 
-8:   for await (const line of stream) {
-9: 	  console.log(`${i++}: ${line.toString()}`)
+5:   const file = fs.createReadStream(__filename)
+6:   const lines = file.pipe(bsplit()) 
+7:   let i = 1
+8:   for await (const line of lines) {
+9:     console.log(`${i++}: ${line.toString()}`)
 10:   }
 11: }
 12: 
