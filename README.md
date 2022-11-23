@@ -84,6 +84,31 @@ When run, will output:
 
 bsplit2's readable streams are "[object mode](https://nodejs.org/api/stream.html#stream_object_mode)" meaning that they apply different backpressure rules even though they are still dealing with binary data. This may be an important consideration depending on your use-case. This can be turned off by messing with `stream._readableState.objectMode` (not recommended) but the internal stream `read()` function will revert back to providing non-newline-delimited chunks because it pulls from a buffer of chunks. This impacts async iterators and some other stream modes but the `'data'` event won't be impacted although it will drop blank lines.
 
+## performance
+
+```
+NANOBENCH version 2
+> /opt/homebrew/Cellar/node/19.1.0/bin/node benchmark.js
+
+# passthrough, Readable src, via stream.pipeline, 1_000 * 100kb
+ok ~11 ms (0 s + 10856000 ns)
+
+# passthrough, Readable src, via stream.pipeline, 50_000 * 100kb
+ok ~38 ms (0 s + 37563542 ns)
+
+# bsplit2.js, Readable src, via stream.pipeline, 1_000 * 100kb
+ok ~908 ms (0 s + 907881792 ns)
+
+# bsplit2.js, Readable src, via stream.pipeline, 50_000 * 100kb
+ok ~45 s (44 s + 951027916 ns)
+
+# bsplit2.js, Readable src, via asyncIterator, 1_000 * 100kb
+ok ~951 ms (0 s + 950868500 ns)
+
+# bsplit2.js, Readable src, via asyncIterator, 50_000 * 100kb
+ok ~48 s (47 s + 703336458 ns)
+```
+
 ## Licence & Copyright
 
 Copyright 2019 Rod Vagg
