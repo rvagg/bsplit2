@@ -24,7 +24,10 @@ function testSmallFile (callback) {
   fs.createReadStream(__filename)
     .pipe(bsplit())
     .on('data', (line) => actual.push(line))
-    .on('end', verify(actual, expected, callback))
+    .on('end', verify(actual, expected, () => {
+      console.info('testSmallFile works')
+      callback()
+    }))
 }
 
 function testRandomChunks (callback) {
@@ -43,7 +46,10 @@ function testRandomChunks (callback) {
 
   list.pipe(bsplit())
     .on('data', (line) => actual.push(line))
-    .on('end', verify(actual, expected, callback))
+    .on('end', verify(actual, expected, () => {
+      console.info('testRandomChunks works')
+      callback()
+    }))
 }
 
 const testSmallFileConsumeAsync = (callback) => {
@@ -59,7 +65,11 @@ const testSmallFileConsumeAsync = (callback) => {
     }
     assert.strictEqual(linesI, expected.length, 'correct length of file')
   })()
-  .then(callback, assert.ifError)
+  .then(() => {
+    console.info('testSmallFileConsumeAsync works')
+    callback()
+  })
+  .catch(assert.ifError)
 }
 
 testSmallFile(() => {
