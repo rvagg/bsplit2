@@ -104,6 +104,39 @@ for await (const line of lines) {
 }
 ```
 
+### (synchronous) iteration
+
+If you want to consume `bsplit2` via [synchronous/"plain" iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_iterator_protocol) and don't need an asynchronicity whatsoever, you can use `bsplit2/it.js`, which
+
+- is 10-20x faster than the stream-based `bsplit2`, but
+- requires the input to be a (synchronous) iterable/iterator, and
+- blocks Node's event loop until it has split all input data.
+
+Because in Node.js almost all APIs are asynchronous/streaming, legitimate use cases for this are rare!
+
+```js
+const {randomBytes} = require('crypto')
+const bsplitAsyncIt = require('bsplit2/async-it.js')
+
+// we make up random data
+const someData = [
+  randomBytes(1024), // 1kb
+  randomBytes(100),
+  randomBytes(3 * 1024),
+]
+const reader = function* () {
+  for (let i = 0; i < someData.length; i++) {
+    yield someData[i]
+  }  
+}
+
+const lines = bsplitAsyncIt(reader())
+let i = 1
+for (const line of stream) {
+  console.log(`${i++}: ${line.toString()}`)
+}
+```
+
 ## performance
 
 ```
@@ -139,6 +172,15 @@ ok ~102 ms (0 s + 102475125 ns)
 
 # async-it.js, asyncIterator src, via asyncIterator, 50_000 * 100kb
 ok ~5.12 s (5 s + 116871834 ns)
+
+# it.js, iterator src, via iterator, 1_000 * 100kb
+ok ~53 ms (0 s + 53113542 ns)
+
+# it.js, iterator src, via iterator, 50_000 * 100kb
+ok ~2.59 s (2 s + 590209416 ns)
+
+all benchmarks completed
+ok ~1.78 min (107 s + 648340043 ns)
 ```
 
 ## Licence & Copyright

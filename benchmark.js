@@ -5,6 +5,7 @@ const {Readable, Writable, pipeline, PassThrough} = require('stream')
 const bench = require('nanobench')
 const bsplit2 = require('.')
 const bsplit2AsyncIt = require('./async-it')
+const bsplit2It = require('./it')
 
 const LINE_FEED = Buffer.from('\n')
 const generateChunks = (amount) => {
@@ -30,6 +31,12 @@ const chunksAsReadable = (chunks) => {
 }
 
 const chunksAsAsyncIt = async function* (chunks) {
+	for (let i = 0; i < chunks.length; i++) {
+		yield chunks[i]
+	}
+}
+
+const chunksAsIt = function* (chunks) {
 	for (let i = 0; i < chunks.length; i++) {
 		yield chunks[i]
 	}
@@ -108,4 +115,11 @@ bench('async-it.js, asyncIterator src, via asyncIterator, 1_000 * 100kb', benchA
 ))
 bench('async-it.js, asyncIterator src, via asyncIterator, 50_000 * 100kb', benchAsyncIt(
 	() => bsplit2AsyncIt(chunksAsAsyncIt(generateChunks(50_000))),
+))
+
+bench('it.js, iterator src, via iterator, 1_000 * 100kb', benchIt(
+	() => bsplit2It(chunksAsIt(generateChunks(1_000))),
+))
+bench('it.js, iterator src, via iterator, 50_000 * 100kb', benchIt(
+	() => bsplit2It(chunksAsIt(generateChunks(50_000))),
 ))

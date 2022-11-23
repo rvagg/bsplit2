@@ -2,6 +2,7 @@
 
 const bsplit = require('./')
 const bsplitAsyncIter = require('./async-it.js')
+const bsplitSyncIter = require('./it.js')
 const fs = require('fs')
 const assert = require('assert')
 const bl = require('bl')
@@ -156,12 +157,52 @@ const testAsyncIterRandomChunks = async (callback) => {
   callback()
 }
 
+const testSyncIterFooBar = (callback) => {
+  const chunks = fooBar.input.map(str => Buffer.from(str))
+  const reader = function* () {
+    for (const chunk of chunks) yield chunk
+  }
+  const it = bsplitSyncIter(reader())
+
+  const {expected} = fooBar
+  let linesI = 0
+  for (const line of it) {
+    assert.strictEqual(line.toString(), expected[linesI], 'correct linesI #' + linesI)
+    linesI++
+  }
+  assert.strictEqual(linesI, expected.length, 'correct length of file')
+
+  console.info('testSyncIterFooBar works')
+}
+
+const testSyncIterRandomChunks = (callback) => {
+  const chunks = generateRandomChunks()
+  const expected = Buffer.concat(chunks).toString('utf8').split('\n')
+
+  const reader = function* () {
+    for (const chunk of chunks) yield chunk
+  }
+  const it = bsplitSyncIter(reader())
+
+  let linesI = 0
+  for (const line of it) {
+    assert.strictEqual(line.toString(), expected[linesI], 'correct linesI #' + linesI)
+    linesI++
+  }
+  assert.strictEqual(linesI, expected.length, 'correct length of file')
+
+  console.info('testSyncIterRandomChunks works')
+}
+
 testStreamSmallFile(() => {
   testStreamRandomChunks(() => {
     testStreamSmallFileConsumeAsync(() => {
       testAsyncIterFooBar(() => {
         testAsyncIterSmallFile(() => {
-          testAsyncIterRandomChunks(() => {})
+          testAsyncIterRandomChunks(() => {
+            testSyncIterFooBar()
+            testSyncIterRandomChunks()
+          })
         })
       })
     })
