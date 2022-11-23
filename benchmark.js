@@ -4,6 +4,7 @@ const {randomBytes} = require('crypto')
 const {Readable, Writable, pipeline, PassThrough} = require('stream')
 const bench = require('nanobench')
 const bsplit2 = require('.')
+const bsplit2AsyncIt = require('./async-it')
 
 const LINE_FEED = Buffer.from('\n')
 const generateChunks = (amount) => {
@@ -93,4 +94,18 @@ bench('bsplit2.js, Readable src, via asyncIterator, 1_000 * 100kb', benchAsyncIt
 ))
 bench('bsplit2.js, Readable src, via asyncIterator, 50_000 * 100kb', benchAsyncIt(
 	() => chunksAsReadable(generateChunks(50_000)).pipe(bsplit2()),
+))
+
+bench('async-it.js, Readable src, via asyncIterator, 1_000 * 100kb', benchAsyncIt(
+	() => bsplit2AsyncIt(chunksAsReadable(generateChunks(1_000))),
+))
+bench('async-it.js, Readable src, via asyncIterator, 50_000 * 100kb', benchAsyncIt(
+	() => bsplit2AsyncIt(chunksAsReadable(generateChunks(50_000))),
+))
+
+bench('async-it.js, asyncIterator src, via asyncIterator, 1_000 * 100kb', benchAsyncIt(
+	() => bsplit2AsyncIt(chunksAsAsyncIt(generateChunks(1_000))),
+))
+bench('async-it.js, asyncIterator src, via asyncIterator, 50_000 * 100kb', benchAsyncIt(
+	() => bsplit2AsyncIt(chunksAsAsyncIt(generateChunks(50_000))),
 ))

@@ -84,6 +84,26 @@ When run, will output:
 
 bsplit2's readable streams are "[object mode](https://nodejs.org/api/stream.html#stream_object_mode)" meaning that they apply different backpressure rules even though they are still dealing with binary data. This may be an important consideration depending on your use-case. This can be turned off by messing with `stream._readableState.objectMode` (not recommended) but the internal stream `read()` function will revert back to providing non-newline-delimited chunks because it pulls from a buffer of chunks. This impacts async iterators and some other stream modes but the `'data'` event won't be impacted although it will drop blank lines.
 
+### async iteration
+
+If you want to consume `bsplit2` via [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_async_iterator_and_async_iterable_protocols) *anyways* and don't need the transform stream behavior (see above), you can use `bsplit2/async-it.js`, which
+
+- is 5-10x faster than the stream-based `bsplit2`, but
+- requires the input to be an async iterable/iterator.
+
+```js
+const fs = require('fs')
+const bsplitAsyncIt = require('bsplit2/async-it.js')
+
+const file = fs.createReadStream(__filename)
+const lines = bsplitAsyncIt(file)
+
+let i = 1
+for await (const line of lines) {
+  console.log(`${i++}: ${line.toString()}`)
+}
+```
+
 ## performance
 
 ```
@@ -107,6 +127,18 @@ ok ~951 ms (0 s + 950868500 ns)
 
 # bsplit2.js, Readable src, via asyncIterator, 50_000 * 100kb
 ok ~48 s (47 s + 703336458 ns)
+
+# async-it.js, Readable src, via asyncIterator, 1_000 * 100kb
+ok ~107 ms (0 s + 107212959 ns)
+
+# async-it.js, Readable src, via asyncIterator, 50_000 * 100kb
+ok ~5.12 s (5 s + 116922959 ns)
+
+# async-it.js, asyncIterator src, via asyncIterator, 1_000 * 100kb
+ok ~102 ms (0 s + 102475125 ns)
+
+# async-it.js, asyncIterator src, via asyncIterator, 50_000 * 100kb
+ok ~5.12 s (5 s + 116871834 ns)
 ```
 
 ## Licence & Copyright
