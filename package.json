@@ -1,6 +1,7 @@
 {
+  "private": true,
   "name": "bsplit2",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A binary transform stream splitting chunks by newline characters",
   "main": "bsplit2.js",
   "scripts": {
@@ -11,7 +12,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rvagg/bsplit2"
+    "url": "https://github.com/derhuerst/bsplit2"
   },
   "keywords": [
     "streams",
