@@ -6,8 +6,6 @@ const assert = require('assert')
 const bl = require('bl')
 const crypto = require('crypto')
 
-const nodeVersion = parseInt(process.version.replace(/v(\d+)\..*/, '$1'), 10)
-
 function verify (actual, expected, callback) {
   return function () {
     assert.strictEqual(actual.length, expected.length, 'correct number of lines')
@@ -48,35 +46,24 @@ function testRandomChunks (callback) {
     .on('end', verify(actual, expected, callback))
 }
 
-const asyncIteratorTestCode = `
-  let expected = fs.readFileSync(__filename, 'utf8').split('\\n')
-  expected = expected.slice(0, expected.length - 1)
-  const stream = fs.createReadStream(__filename).pipe(bsplit())
+const testSmallFileConsumeAsync = (callback) => {
+  ;(async () => {
+    let expected = fs.readFileSync(__filename, 'utf8').split('\n')
+    expected = expected.slice(0, expected.length - 1)
+    const stream = fs.createReadStream(__filename).pipe(bsplit())
 
-  let line = 0
-  for await (const chunk of stream) {
-    assert.strictEqual(chunk.toString(), expected[line++], 'correct line #' + line)
-  }
-  assert.strictEqual(line, expected.length, 'correct length of file')
-`
+    let linesI = 0
+    for await (const line of stream) {
+      assert.strictEqual(line.toString(), expected[linesI], 'correct line #' + linesI)
+      linesI++
+    }
+    assert.strictEqual(linesI, expected.length, 'correct length of file')
+  })()
+  .then(callback, assert.ifError)
+}
 
 testSmallFile(() => {
   testRandomChunks(() => {
-    if (nodeVersion >= 10) {
-      // async/await is for Node 10+, and Node 10+ streams support async iterators
-      // eslint-disable-next-line
-      const AsyncFunction = new Function(
-        'return Object.getPrototypeOf(async function(){}).constructor')()
-      const testAsyncIterator = new AsyncFunction(
-        'assert',
-        'fs',
-        '__filename',
-        'bsplit',
-        asyncIteratorTestCode)
-      testAsyncIterator(assert, fs, __filename, bsplit).catch((err) => {
-        console.error(err.stack)
-        process.exit(1)
-      })
-    }
+    testSmallFileConsumeAsync(() => {})
   })
 })
